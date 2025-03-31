@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abstracts & Summaries</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .card {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .title {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .title h2 {
+            margin: 0;
+            font-size: 1.6em;
+            color: #333;
+        }
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .card-abstract, .card-summary {
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .card-abstract {
+            background-color: #f9f9f9;
+        }
+        .card-summary {
+            background-color: #eef6ff;
+        }
+        .article-id {
+            font-size: 14px;
+            color: #666;
+        }
+        .article-url {
+            margin-top: 10px;
+        }
+        #date-picker {
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Abstracts & Summaries</h2>
+
+    <label for="date-picker">Select Date:</label>
+    <input type="date" id="date-picker">
+    <button onclick="fetchArticles()">Fetch Articles</button>
+
+    <div id="articles" class="container"></div>
+
+    <script>
+        async function fetchArticles() {
+            const dateInput = document.getElementById("date-picker").value;
+            if (!dateInput) {
+                alert("Please select a date.");
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:8000/articles?date=${dateInput}`);
+                const data = await response.json();
+
+                const articlesContainer = document.getElementById("articles");
+                articlesContainer.innerHTML = ""; // Clear previous content
+
+                if (data.length === 0) {
+                    articlesContainer.innerHTML = "<p>No articles available for this date.</p>";
+                    return;
+                }
+
+                data.forEach(article => {
+                    const articleCard = document.createElement("div");
+                    articleCard.classList.add("card");
+
+                    const articleId = article.id;
+                    const articleUrl = `http://arxiv.org/abs/${articleId}`;
+
+                    // Add the title section
+                    const titleDiv = document.createElement("div");
+                    titleDiv.classList.add("title");
+                    const title = document.createElement("h2");
+                    title.textContent = article.title;
+                    titleDiv.appendChild(title);
+                    articleCard.appendChild(titleDiv);
+
+                    // Add the content section (Abstract + Summary)
+                    const contentDiv = document.createElement("div");
+                    contentDiv.classList.add("content");
+
+                    // Abstract section
+                    const abstractDiv = document.createElement("div");
+                    abstractDiv.classList.add("card-abstract");
+                    const abstractHeader = document.createElement("h3");
+                    abstractHeader.textContent = "Abstract";
+                    const abstractContent = document.createElement("p");
+                    abstractContent.textContent = article.abstract || "No abstract available";
+                    const articleIdElement = document.createElement("p");
+                    articleIdElement.classList.add("article-id");
+                    articleIdElement.textContent = `ID: ${articleId}`;
+                    const articleUrlLink = document.createElement("a");
+                    articleUrlLink.href = articleUrl;
+                    articleUrlLink.target = "_blank";
+                    articleUrlLink.classList.add("article-url");
+                    articleUrlLink.textContent = "Read on arXiv";
+
+                    abstractDiv.appendChild(abstractHeader);
+                    abstractDiv.appendChild(abstractContent);
+                    abstractDiv.appendChild(articleIdElement);
+                    abstractDiv.appendChild(articleUrlLink);
+
+                    // Summary section
+                    const summaryDiv = document.createElement("div");
+                    summaryDiv.classList.add("card-summary");
+                    const summaryHeader = document.createElement("h3");
+                    summaryHeader.textContent = "Summary";
+                    const summaryContent = document.createElement("p");
+                    summaryContent.innerHTML = article.summary || "<em>Summary not available</em>";
+
+                    summaryDiv.appendChild(summaryHeader);
+                    summaryDiv.appendChild(summaryContent);
+
+                    // Append abstract and summary sections to content div
+                    contentDiv.appendChild(abstractDiv);
+                    contentDiv.appendChild(summaryDiv);
+
+                    // Append content div to the card
+                    articleCard.appendChild(contentDiv);
+
+                    // Append the card to the container
+                    articlesContainer.appendChild(articleCard);
+                });
+
+            } catch (error) {
+                console.error("Error fetching articles:", error);
+                document.getElementById("articles").innerHTML = "<p>Error loading articles. Please try again later.</p>";
+            }
+        }
+    </script>
+
+</body>
+</html>
