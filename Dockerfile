@@ -18,7 +18,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the project files
-COPY ./process/ .
+COPY ./process/ ./process/
 
 # Run the processing script
-CMD ["python3", "intelligence.py"]
+CMD ["python3", "process/intelligence.py"]
