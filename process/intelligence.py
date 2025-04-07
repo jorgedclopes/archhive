@@ -1,4 +1,3 @@
-import json
 import os
 from openai import OpenAI
 
@@ -42,7 +41,7 @@ def generate_summary(abstract):
         model="microsoft/phi-3-medium-128k-instruct:free",
         messages=[{"role": "user", "content": content}],
     )
-    if hasattr(completion, "error"):
+    if hasattr(completion, "error") and " " in completion["error"]:
         raise RateLimitError(completion.error["message"])
     return completion.choices[0].message.content
 
