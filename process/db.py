@@ -21,7 +21,7 @@ class PGDB:
         """Establish connection to PostgreSQL."""
         return psycopg2.connect(**(config or self.DB_CONFIG))
 
-    def insert_article(self, articles):
+    def insert_article(self, articles) -> None:
         """Insert article into PostgreSQL, avoiding duplicates."""
 
         query = """
@@ -61,7 +61,7 @@ class PGDB:
         if hasattr(self, "connection"):
             self.connection.close()
 
-    def get_articles_stream(self, limit=200):
+    def get_articles_stream(self, limit=200) -> dict:
         """
 
         :param limit: amount of articles to fetch. 200 is the default value for OpenRouter
@@ -83,7 +83,7 @@ LIMIT %s;"""
             print(f"Database error: {e}")
             raise
 
-    def insert_summary(self, article_id, summary):
+    def insert_summary(self, article_id, summary) -> None:
         query = """INSERT INTO test.llm_summary (
     id,
     summary,

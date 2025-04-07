@@ -48,7 +48,7 @@ def generate_summary(abstract):
 
 
 if __name__ == "__main__":
-    for article in db.get_articles_stream(limit=190):
-        print(f"Processing {article['id']}")
+    for i, article in enumerate(db.get_articles_stream(limit=190)):
+        print(f"Processing article {article['id']} - number {i+1} of the run")
         summary = generate_summary(article["abstract"])
         db.insert_summary(article["id"], summary)

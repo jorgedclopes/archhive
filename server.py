@@ -1,9 +1,10 @@
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, HTTPException
 from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 import os
 import logging
+
+from server_response import ArticleResponse
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -15,11 +16,6 @@ app = FastAPI()
 if not os.path.exists("./static"):
     os.mkdir("./static")
 app.mount("/static", StaticFiles(directory="static"), name="static")
-
-# Set up templates
-if not os.path.exists("./templates"):
-    os.mkdir("./templates")
-templates = Jinja2Templates(directory="templates")
 
 
 from fastapi import FastAPI
@@ -93,6 +89,31 @@ def get_random_articles(
             f"Random articles fetched: {[article['id'] for article in articles]}"
         )
     return articles
+
+
+@app.get("/article", response_model=ArticleResponse)
+async def get_article(article_id: str):
+    """Fetches an article by ID from the database."""
+    query = """
+        SELECT r.id, r.title, r.abstract, s.summary 
+        FROM test.raw r
+        LEFT JOIN test.llm_summary s ON r.id = s.id
+        WHERE r.id = %s
+    """
+    with conn.cursor(cursor_factory=RealDictCursor) as cursor:
+        try:
+            cursor.execute(query, (article_id,))
+            result = cursor.fetchone()
+
+            if not result:
+                raise HTTPException(status_code=404, detail="Article not found")
+            logger.info(
+                f"Articles fetched: {result}"
+            )
+            return result
+
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
 
 @app.get("/categories")

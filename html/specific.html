@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Article Lookup</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .card {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .row.title {
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .row.content {
+            display: flex;
+            justify-content: space-between;
+        }
+        .column {
+            flex: 1;
+            padding: 10px;
+            overflow-wrap: break-word;
+        }
+        .abstract {
+            background-color: #f9f9f9;
+        }
+        .summary {
+            background-color: #eef6ff;
+        }
+        .article-id {
+            font-size: 14px;
+            color: #666;
+        }
+        .article-url {
+            display: block;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Lookup Article by ID</h2>
+
+    <label for="article-id-input">Enter Article ID:</label>
+    <input type="text" id="article-id-input">
+    <button onclick="fetchArticle()">Fetch Article</button>
+
+    <a href="index.html">Go to Date-Based Articles</a>
+
+    <div id="articles" class="container"></div>
+
+    <script>
+        async function fetchArticle() {
+            const articleId = document.getElementById("article-id-input").value.trim();
+            if (!articleId) {
+                alert("Please enter a valid article ID.");
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:8000/article?article_id=${articleId}`);
+                if (!response.ok) {
+                    throw new Error("Article not found");
+                }
+                const article = await response.json();
+
+                const articlesContainer = document.getElementById("articles");
+                articlesContainer.innerHTML = ""; // Clear previous content
+
+                const articleCard = document.createElement("div");
+                articleCard.classList.add("card");
+
+                const articleUrl = `http://arxiv.org/abs/${articleId}`;
+
+                articleCard.innerHTML = `
+                    <div class="row title">
+                        <h2>${article.title}</h2>
+                    </div>
+                    <div class="row content">
+                        <div class="column abstract">
+                            <h3>Abstract</h3>
+                            <p>${article.abstract || "No abstract available"}</p>
+                            <p class="article-id">ID: ${articleId}</p>
+                            <a href="${articleUrl}" target="_blank" class="article-url">Read on arXiv</a>
+                        </div>
+                        <div class="column summary">
+                            <h3>Summary</h3>
+                            <p>${article.summary ? article.summary : "<em>Summary not available</em>"}</p>
+                        </div>
+                    </div>
+                `;
+
+                articlesContainer.appendChild(articleCard);
+            } catch (error) {
+                console.error("Error fetching article:", error);
+                document.getElementById("articles").innerHTML = "<p>Error loading article. Please check the ID and try again.</p>";
+            }
+        }
+    </script>
+
+</body>
+</html>
