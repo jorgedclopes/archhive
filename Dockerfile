@@ -21,4 +21,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY ./process/ ./process/
 
 # Run the processing script
-CMD ["python3", "process/intelligence.py"]
+CMD ["python3", "-m", "process.intelligence"]

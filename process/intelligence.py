@@ -38,7 +38,7 @@ def generate_summary(abstract):
             "HTTP-Referer": "ArchHive",  # Optional. Site URL for rankings on openrouter.ai.
             "X-Title": "ArchHive",  # Optional. Site title for rankings on openrouter.ai.
         },
-        model="microsoft/phi-3-medium-128k-instruct:free",
+        model="deepseek/deepseek-r1:free",
         messages=[{"role": "user", "content": content}],
     )
     if hasattr(completion, "error") and " " in completion.error["message"]:
@@ -47,7 +47,7 @@ def generate_summary(abstract):
 
 
 if __name__ == "__main__":
-    for i, article in enumerate(db.get_articles_stream(limit=45)):
+    for i, article in enumerate(db.get_articles_stream(limit=50)):
         print(f"Processing article {article['id']} - number {i+1} of the run")
         summary = generate_summary(article["abstract"])
         db.insert_summary(article["id"], summary)
