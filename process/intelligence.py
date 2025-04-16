@@ -38,7 +38,7 @@ def generate_summary(abstract):
             "HTTP-Referer": "ArchHive",  # Optional. Site URL for rankings on openrouter.ai.
             "X-Title": "ArchHive",  # Optional. Site title for rankings on openrouter.ai.
         },
-        model="deepseek/deepseek-r1:free", #"microsoft/phi-3-medium-128k-instruct:free",
+        model="deepseek/deepseek-r1:free",
         messages=[{"role": "user", "content": content}],
     )
     if hasattr(completion, "error") and " " in completion.error["message"]:
